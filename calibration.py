@@ -94,19 +94,3 @@ if __name__ == '__main__':
         cv2.imwrite("wl_resize.jpg", wl_resize)
         final = shift(hsi, wl_resize, shift= SHIFT, alpha= ALPHA)
         cv2.imwrite("calibration_result.png", final)
-
-# ----------------------------------------------------
-'''
-hsi:0.05mm = 90pixel
--> 1pixel= 0.555um
-2048*1536
-
-wl:0.05mm = 160pixel
--> 1pixel = 0.3125um
-4088*3072
-
-size>>>wl*(90/160) = 2300*1728
-shift>>>center2center(-127,-96),x+294
-
-cv2.resize: cubic for inlarge, area for shrink
-'''
