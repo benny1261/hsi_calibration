@@ -3,15 +3,15 @@ import numpy as np
 from aux_ import FeatureExtraction, feature_matching
 import matplotlib.pyplot as plt
 
-img0 = cv2.imread("wl_resize.jpg", cv2.IMREAD_COLOR)
-img1 = cv2.imread("calibration10x_hsi.png", cv2.IMREAD_COLOR)
+img0 = cv2.imread("wl_resize.jpg")
+img1 = cv2.imread("calibration10x_hsi.png")
 
 features0 = FeatureExtraction(img0)
 features1 = FeatureExtraction(img1)
 
 matches = feature_matching(features0, features1)
 matched_image = cv2.drawMatches(img0, features0.kps,img1, features1.kps, matches, None, flags=2)
-cv2.imwrite("t.jpg", matched_image)
+cv2.imwrite("method1_out.jpg", matched_image)
 
 H, _ = cv2.findHomography(features0.matched_pts,features1.matched_pts, cv2.RANSAC, 5.0)
 
