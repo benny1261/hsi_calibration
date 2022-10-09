@@ -25,6 +25,9 @@ using opencv [link](https://magamig.github.io/posts/accurate-image-alignment-and
 method 2:
 using opencv [link](https://www.geeksforgeeks.org/image-registration-using-opencv-python/)
 
+method 3:
+using cv2.matchTemplate [link](https://pyimagesearch.com/2021/03/22/opencv-template-matching-cv2-matchtemplate/)
+
 using matlab [link](https://www.mathworks.com/help/images/registering-an-image-using-normalized-cross-correlation.html?fbclid=IwAR0oiogTrI5Q_FoF52qB9MrFuFWO-bqjlAac4yXtU9uV527DuyuTEskvlGk)
 
 more about ORB algorithm [link](https://zhuanlan.zhihu.com/p/261966288)
