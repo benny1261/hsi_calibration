@@ -1,19 +1,19 @@
-import cv2 as cv
+import cv2
 import numpy as np
 import copy
 
 
-orb = cv.ORB_create(
+orb = cv2.ORB_create(
     nfeatures=10000,
     scaleFactor=1.2,
-    scoreType=cv.ORB_HARRIS_SCORE)
+    scoreType=cv2.ORB_HARRIS_SCORE)
 
 class FeatureExtraction:
     def __init__(self, img):
         self.img = copy.copy(img)
-        self.gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+        self.gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         self.kps, self.des = orb.detectAndCompute(self.gray_img, None)
-        self.img_kps = cv.drawKeypoints(self.img, self.kps, 0, flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        self.img_kps = cv2.drawKeypoints(self.img, self.kps, 0, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
         self.matched_pts = []
 
 LOWES_RATIO = 0.7
@@ -24,9 +24,7 @@ index_params = dict(
     key_size = 10,
     multi_probe_level = 2)
 search_params = dict(checks=50)
-flann = cv.FlannBasedMatcher(
-    index_params,
-    search_params)
+flann = cv2.FlannBasedMatcher(index_params, search_params)
 
 def feature_matching(features0, features1):
     matches = [] # good matches as per Lowe's ratio test

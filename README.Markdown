@@ -19,6 +19,9 @@ a program to calibrate pixel difference and shift between white light image and 
 
 ## references
 
+method 1:
 using opencv [link](https://magamig.github.io/posts/accurate-image-alignment-and-registration-using-opencv/)
 
 using matlab [link](https://www.mathworks.com/help/images/registering-an-image-using-normalized-cross-correlation.html?fbclid=IwAR0oiogTrI5Q_FoF52qB9MrFuFWO-bqjlAac4yXtU9uV527DuyuTEskvlGk)
+
+more about ORB algorithm [link](https://zhuanlan.zhihu.com/p/261966288)
