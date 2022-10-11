@@ -53,10 +53,10 @@ if __name__ == '__main__':
     COMPRESSION_RATIO = 0.5678              #9/16 =0.5625
     SHIFT = (165, -105)                     # (x, y)
     ALPHA = 125
-    CALIBRATION = False
+    CALIBRATION = True
 
     # READ =============================================================================================
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    os.chdir(os.path.dirname(os.path.abspath(__file__))+'/data')
     print(os.getcwd())
     img_list = glob.glob('*.jpg')+ glob.glob('*.png')
     hsi_dict = {}
@@ -91,6 +91,7 @@ if __name__ == '__main__':
         wl = cv2.imread("calibration10x_wl.jpg", cv2.IMREAD_COLOR)
 
         wl_resize = cv2.resize(wl, (0,0), fx= COMPRESSION_RATIO, fy= COMPRESSION_RATIO, interpolation= cv2.INTER_AREA)
-        cv2.imwrite("wl_resize.jpg", wl_resize)
+        wl_inv = 255*np.ones_like(wl_resize)-wl_resize
+        cv2.imwrite("wl_mod.jpg", wl_inv)
         final = shift(hsi, wl_resize, shift= SHIFT, alpha= ALPHA)
         cv2.imwrite("calibration_result.png", final)
