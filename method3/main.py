@@ -32,19 +32,14 @@ template must be smaller in size than image!!!
 hsi: 1536*2048
 wl_resize: 1728*2300
 '''
-th_ex, expy, expx = utils.makeborder(image_th, temp_th, 255)
+th_ex = utils.makeborder(image_th, temp_th, 255)
 result = cv2.matchTemplate(th_ex, temp_th, cv2.TM_CCOEFF_NORMED)
-(minVal, maxVal, minLoc, maxLoc) = cv2.minMaxLoc(result)
-
-(startX, startY) = maxLoc
-endY = startY + template.shape[0]
-endX = startX + template.shape[1]
-delta = (startX-expx, startY-expy)
+(minVal, maxVal, minLoc, maxLoc) = cv2.minMaxLoc(result)        #  (X, Y) = Loc, can use mask??
+# maxLoc = np.unravel_index(np.argmax(result, axis=None), result.shape)
+print("Maxloc:", maxLoc)
 
 # Appling calculated shift on original image===============================================
-image_ex, _, _ = utils.makeborder(image, template, 255)
-image_ex[startY:endY, startX:endX] = template
-final = utils.cropborder(image_ex, expy, expx)
+final, delta = utils.overlay_coord(image, template, maxLoc)
 
 print("shift=", delta)                              # (x, y)
 cv2.imwrite("output.jpg", final)
