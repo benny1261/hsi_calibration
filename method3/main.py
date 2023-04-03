@@ -9,8 +9,8 @@ blur_kernal = (3, 3)
 dilate_kernal = (3, 3)
 
 os.chdir('data/')
-image = cv2.imread("calibration10x_hsi.png", cv2.IMREAD_GRAYSCALE)
-template = cv2.imread("wl_mod.jpg", cv2.IMREAD_GRAYSCALE)
+image = cv2.imread("hsi_cali.png", cv2.IMREAD_GRAYSCALE)
+template = cv2.imread("wl_cali.png", cv2.IMREAD_GRAYSCALE)
 
 # Preprocessing============================================================================
 clahe = cv2.createCLAHE(clipLimit= CLIP_LIMIT, tileGridSize= (TILEGRIDSIZE, TILEGRIDSIZE))
@@ -20,6 +20,7 @@ image_blr = cv2.GaussianBlur(image_cla, blur_kernal, 0)
 ret, image_th = cv2.threshold(image_blr,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
 cv2.imwrite("img.jpg", image_th)
 
+template = cv2.resize(template, (2508, 1411), interpolation= cv2.INTER_CUBIC)   # resize
 # template = clahe.apply(template)
 template_blr = cv2.GaussianBlur(template, blur_kernal, 0)
 ret, temp_th = cv2.threshold(template_blr,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
@@ -28,14 +29,14 @@ cv2.imwrite("tem.jpg", temp_th)
 
 # Expanding ref image======================================================================
 '''
-template must be smaller in size than image!!!
+template must be smaller or equal than image in size!!!
 hsi: 1536*2048
-wl_resize: 1728*2300
+wl_resize: 1411*2508
 '''
 th_ex = utils.makeborder(image_th, temp_th, 255)
 result = cv2.matchTemplate(th_ex, temp_th, cv2.TM_CCOEFF_NORMED)
+print('th_ex:',th_ex.shape, 'result shape:', result.shape)
 (minVal, maxVal, minLoc, maxLoc) = cv2.minMaxLoc(result)        #  (X, Y) = Loc, can use mask??
-# maxLoc = np.unravel_index(np.argmax(result, axis=None), result.shape)
 print("Maxloc:", maxLoc)
 
 # Appling calculated shift on original image===============================================

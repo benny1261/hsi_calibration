@@ -17,7 +17,7 @@ def makeborder(small_image, large_image, fill= int):
 def cropborder(image, exp_y, exp_x):
     return(image[exp_y:-exp_y, exp_x:-exp_x])
 
-def overlay_coord(backgd_image, top_image, coord= tuple) -> tuple:
+def overlay_coord(backgd_image, top_image, coord:tuple) -> tuple:
     '''coord: coordinate of (0, 0) of top_image on 'expanded' backgd_image (x, y)\n
     ret-> (tuple) overlay image, (delta_x, delta_y)'''
 

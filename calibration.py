@@ -2,11 +2,23 @@ import cv2
 import numpy as np
 import glob
 import os
-import re
 
-def shift(hsi, wl, shift, alpha = 125):
-    '''shift -> allows a tuple (delta_y, delta_x), defined as (0,0) of wl relative to hsi's aligned\n
-    alpha -> transparency
+# PARAM ============================================================================================
+COMPRESSION_RATIO = 1.3056              # 362/278 = 1.30216
+SHIFT = (-178, 126)                     # (x, y)
+ALPHA = 0.5
+CALIBRATION = False
+
+def resize(img:np.ndarray, ratio:float = COMPRESSION_RATIO):
+    if ratio >= 1:
+        resized = cv2.resize(img, (0,0), fx= ratio, fy= ratio, interpolation= cv2.INTER_CUBIC)
+    else:
+        resized = cv2.resize(img, (0,0), fx= ratio, fy= ratio, interpolation= cv2.INTER_AREA)
+
+    return resized
+
+def shifted_mask(hsi, wl, shift:tuple):
+    '''shift -> allows a tuple (delta_x, delta_y), defined as (0,0) of wl relative to hsi's aligned\n
     @ret: a png format image'''
     # following values are based on number of pixels instead of pixel index
     x, y = shift
@@ -29,7 +41,7 @@ def shift(hsi, wl, shift, alpha = 125):
     else: patch_right = abs(dx2)
 
     # adding alpha layer=======================================
-    wl = np.dstack((wl, alpha*np.ones((wl.shape[0], wl.shape[1]))))         # notice that opencv and numpy arrays are transpose relations
+    wl = np.dstack((wl, 255*np.ones((wl.shape[0], wl.shape[1]))))           # notice that opencv and numpy arrays are transpose relations
 
     # patching ================================================
     up_arr = np.dstack((np.zeros((patch_up, wl.shape[1]), dtype=np.uint8), np.zeros((patch_up, wl.shape[1]), dtype=np.uint8), np.zeros((patch_up, wl.shape[1]), dtype=np.uint8),
@@ -44,20 +56,29 @@ def shift(hsi, wl, shift, alpha = 125):
     wl = np.vstack((up_arr, wl, down_arr))
     wl = np.hstack((left_arr, wl, right_arr))
 
-    print("shape of final wl:", wl.shape)
     return wl
 
+def shifted_combine(hsi:np.ndarray, wl:np.ndarray, shift:tuple, alpha:int = ALPHA):
+    '''shift -> allows a tuple (delta_x, delta_y), defined as (0,0) of wl relative to hsi's aligned\n
+    alpha -> transparency
+    @ret: a png format image'''
+    # following values are based on number of pixels instead of pixel index
+
+    dx, dy = shift
+    top, bottom, left, right = dy, dy+wl.shape[0], dx, dx+wl.shape[1]
+
+    slice_t, slice_b = max(-top, 0), min(wl.shape[0], hsi.shape[0]-dy)
+    slice_l, slice_r = max(-left, 0), min(wl.shape[1], hsi.shape[1]-dx)
+    # slicing using index =====================================
+    wl_slice = wl[slice_t:slice_b, slice_l:slice_r]
+    hsi_overlay = np.s_[max(0, top):min(hsi.shape[0], bottom), max(0, left): min(hsi.shape[1], right)]
+    hsi[hsi_overlay] = cv2.addWeighted(hsi[hsi_overlay], alpha, wl_slice, 1-alpha, gamma= 1)
+
+    return hsi
+
 if __name__ == '__main__':
-
-    # PARAM ============================================================================================
-    COMPRESSION_RATIO = 0.5678              #9/16 =0.5625
-    SHIFT = (165, -105)                     # (x, y)
-    ALPHA = 125
-    CALIBRATION = True
-
     # READ =============================================================================================
     os.chdir(os.path.dirname(os.path.abspath(__file__))+'/data')
-    print(os.getcwd())
     img_list = glob.glob('*.jpg')+ glob.glob('*.png')
     hsi_dict = {}
     wl_dict = {}
@@ -77,21 +98,21 @@ if __name__ == '__main__':
         else:
             for key, value in hsi_dict.items():
                 wl_key = key.replace("hsi", "wl")
-                wl_resize = cv2.resize(wl_dict[wl_key], (0,0), fx= COMPRESSION_RATIO, fy= COMPRESSION_RATIO, interpolation= cv2.INTER_AREA)
-                final = shift(value, wl_resize, shift= SHIFT, alpha= ALPHA)
-                if re.search('._hsi', key):
-                    filename = key.replace("_hsi","")+"_cali"
-                else:
-                    filename = key.replace("hsi","")+"_cali"
-                cv2.imwrite(filename+'.png', final)
+                wl_resize = resize(wl_dict[wl_key])
+                final = shifted_mask(value, wl_resize, shift= SHIFT)
+                final2 = shifted_combine(value, wl_resize, shift= SHIFT)
+                filename = key.replace("hsi","")
+                cv2.imwrite(filename+'_mask.png', final)
+                cv2.imwrite(filename+'_combine.png', final2)
 
     # Reference ========================================================================================
     if CALIBRATION:
-        hsi = cv2.imread("calibration10x_hsi.png", cv2.IMREAD_COLOR)
-        wl = cv2.imread("calibration10x_wl.jpg", cv2.IMREAD_COLOR)
+        hsi = cv2.imread("hsi_cali.png", cv2.IMREAD_COLOR)
+        wl = cv2.imread("wl_cali.png", cv2.IMREAD_COLOR)
 
-        wl_resize = cv2.resize(wl, (0,0), fx= COMPRESSION_RATIO, fy= COMPRESSION_RATIO, interpolation= cv2.INTER_AREA)
-        wl_inv = 255*np.ones_like(wl_resize)-wl_resize
-        cv2.imwrite("wl_mod.jpg", wl_inv)
-        final = shift(hsi, wl_resize, shift= SHIFT, alpha= ALPHA)
-        cv2.imwrite("calibration_result.png", final)
+        wl_resize = resize(wl)
+        final = shifted_mask(hsi, wl_resize, shift= SHIFT)
+        final2 = shifted_combine(hsi, wl_resize, shift= SHIFT)
+        cv2.imwrite("masked.png", final)
+        cv2.imwrite("combined.png", final2)
+    
