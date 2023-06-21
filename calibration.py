@@ -8,6 +8,7 @@ COMPRESSION_RATIO = 1.3056              # 362/278 = 1.30216
 SHIFT = (-178, 126)                     # (x, y)
 ALPHA = 0.5
 CALIBRATION = False
+MASK = False
 
 def resize(img:np.ndarray, ratio:float = COMPRESSION_RATIO):
     if ratio >= 1:
@@ -99,10 +100,11 @@ if __name__ == '__main__':
             for key, value in hsi_dict.items():
                 wl_key = key.replace("hsi", "wl")
                 wl_resize = resize(wl_dict[wl_key])
-                final = shifted_mask(value, wl_resize, shift= SHIFT)
-                final2 = shifted_combine(value, wl_resize, shift= SHIFT)
                 filename = key.replace("hsi","")
-                cv2.imwrite(filename+'_mask.png', final)
+                if MASK:
+                    final = shifted_mask(value, wl_resize, shift= SHIFT)
+                    cv2.imwrite(filename+'_mask.png', final)                    
+                final2 = shifted_combine(value, wl_resize, shift= SHIFT)
                 cv2.imwrite(filename+'_combine.png', final2)
 
     # Reference ========================================================================================
