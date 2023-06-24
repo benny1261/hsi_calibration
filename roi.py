@@ -69,17 +69,27 @@ if __name__ == '__main__':
                 except:
                     print('no txt file of', name)
                     continue
-                cy = int(re.compile('(?<=y)\d+').search(position).group())
-                cx = int(re.compile('(?<=x)\d+').search(position).group())
-                print(f'position= ({cy},{cx})')
-                nparr = slice3d(arr, cy, cx)
-                if nparr is not None:
-                    # print(nparr.shape)
-                    np.save(name, nparr)
-                    img_gray = cv2.normalize(nparr[:,:,OUTPUT_CHANNEL], None,0,255, cv2.NORM_MINMAX, cv2.CV_8UC1)
-                    cv2.imwrite(name+'_slice.jpg', img_gray)
-                    print('slice saved')
-                    mask = automask(img_gray)
-                    cv2.imwrite(name+'_mask.jpg', mask)
+                if position is not None:
+                    rule_y = re.compile('(?<=y)\d+', re.IGNORECASE)
+                    cys = [int(match.group()) for match in rule_y.finditer(position)]           # remember to convert to integer
+                    rule_x = re.compile('(?<=x)\d+', re.IGNORECASE)
+                    cxs = [int(match.group()) for match in rule_x.finditer(position)]
+                    # cy = int(re.compile('(?<=y)\d+', re.IGNORECASE).search(position).group())
+                    # cx = int(re.compile('(?<=x)\d+', re.IGNORECASE).search(position).group())
+                    for index, (cy, cx) in enumerate(zip(cys, cxs)):
+                        print(f'position = ({cy},{cx})')
+                        nparr = slice3d(arr, cy, cx)
+                        # print(nparr.shape)
+                        img_gray = cv2.normalize(nparr[:,:,OUTPUT_CHANNEL], None,0,255, cv2.NORM_MINMAX, cv2.CV_8UC1)
+                        mask = automask(img_gray)
+                        if len(cys) == 1:
+                            np.save(name, nparr)
+                            cv2.imwrite(name+'_slice.jpg', img_gray)
+                            cv2.imwrite(name+'_mask.jpg', mask)
+                        else:
+                            np.save(f'{name}_{index}', nparr)
+                            cv2.imwrite(f'{name}_slice_{index}.jpg', img_gray)
+                            cv2.imwrite(f'{name}_mask_{index}.jpg', mask)
+                        print('slice saved')
                     # cv2.imshow("Segmented Object", mask)
                     # cv2.waitKey(0)
