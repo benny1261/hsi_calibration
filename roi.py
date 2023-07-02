@@ -38,8 +38,8 @@ def automask(grayimg)-> np.ndarray:
     mask = measure.label(mask, connectivity= 2)                     # label
     center_coor = int((grayimg.shape[0]-1)/2)
     center_label = mask[center_coor, center_coor]
-    graymask = np.where(mask == center_label, 255, 0).astype(np.uint8)
-    return graymask
+    binarymask = np.where(mask == center_label, 255, 0).astype(np.uint8)
+    return binarymask
 
 if __name__ == '__main__':
     rootdir = os.path.dirname(__file__)+r'/data'
@@ -85,11 +85,11 @@ if __name__ == '__main__':
                         if len(cys) == 1:
                             np.save(name, nparr)
                             cv2.imwrite(name+'_slice.jpg', img_gray)
-                            cv2.imwrite(name+'_mask.jpg', mask)
+                            cv2.imwrite(name+'_mask.png', mask)     # should not save as jpg since compression may change values
                         else:
                             np.save(f'{name}_{index}', nparr)
                             cv2.imwrite(f'{name}_slice_{index}.jpg', img_gray)
-                            cv2.imwrite(f'{name}_mask_{index}.jpg', mask)
+                            cv2.imwrite(f'{name}_mask_{index}.png', mask)       # should not save as jpg since compression may change values
                         print('slice saved')
                     # cv2.imshow("Segmented Object", mask)
                     # cv2.waitKey(0)
