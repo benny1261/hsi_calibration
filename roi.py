@@ -4,7 +4,7 @@ from spectral.io import envi
 import spectral
 import glob
 import re
-import math
+# import math
 import cv2
 from skimage import morphology, measure
 # from skimage.segmentation import slic
@@ -18,15 +18,16 @@ xxx.txt(position info)
 '''
 
 OUTPUT_CHANNEL = 50
-BOX_LENGTH = 41         # use odd positive integer
-HALF_LEN = int(math.ceil(BOX_LENGTH-1)/2)
+BOX_LENGTH = 32             # better use power of 2
+# HALF_LEN = int(math.ceil(BOX_LENGTH-1)/2)
+HALF_LEN = int(BOX_LENGTH/2)
 
 def slice3d(hsi, cy: int, cx: int)-> np.ndarray:
     '''slice hsi into 3d numpy array'''
     if any((cy<HALF_LEN, cy>hsi.shape[0]-HALF_LEN, cx<HALF_LEN, cx>hsi.shape[1]-HALF_LEN)):
         print('position out of range')
     else:
-        return np.array(hsi[cy-HALF_LEN:cy+HALF_LEN+1,cx-HALF_LEN:cx+HALF_LEN+1,:])
+        return np.array(hsi[cy-HALF_LEN:cy+HALF_LEN,cx-HALF_LEN:cx+HALF_LEN,:])
 
 def automask(grayimg)-> np.ndarray:
     _, mask = cv2.threshold(grayimg, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -79,13 +80,12 @@ if __name__ == '__main__':
                     for index, (cy, cx) in enumerate(zip(cys, cxs)):
                         print(f'position = ({cy},{cx})')
                         nparr = slice3d(arr, cy, cx)
-                        # print(nparr.shape)
                         img_gray = cv2.normalize(nparr[:,:,OUTPUT_CHANNEL], None,0,255, cv2.NORM_MINMAX, cv2.CV_8UC1)
                         mask = automask(img_gray)
                         if len(cys) == 1:
                             np.save(name, nparr)
                             cv2.imwrite(name+'_slice.jpg', img_gray)
-                            cv2.imwrite(name+'_mask.png', mask)     # should not save as jpg since compression may change values
+                            cv2.imwrite(name+'_mask.png', mask)                 # should not save as jpg since compression may change values
                         else:
                             np.save(f'{name}_{index}', nparr)
                             cv2.imwrite(f'{name}_slice_{index}.jpg', img_gray)
