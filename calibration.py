@@ -86,26 +86,37 @@ if __name__ == '__main__':
 
     # Process===========================================================================================
     if not CALIBRATION:
-        for i in img_list:
-            if 'hsi' in i and i != "hsi_cali.png":
-                hsi_dict[i.split(".")[0]] = cv2.imread(i, cv2.IMREAD_COLOR)
-            elif 'wl' in i and i != "wl_cali.png":
-                wl_dict[i.split(".")[0]] = cv2.imread(i, cv2.IMREAD_COLOR)
+        # for i in img_list:
+        #     if 'hsi' in i and i != "hsi_cali.png":
+        #         hsi_dict[i.split(".")[0]] = cv2.imread(i, cv2.IMREAD_COLOR)
+        #     elif 'wl' in i and i != "wl_cali.png":
+        #         wl_dict[i.split(".")[0]] = cv2.imread(i, cv2.IMREAD_COLOR)
 
-        if (not hsi_dict) or (not wl_dict):
-            raise IOError(FileNotFoundError, "insufficient required image")
-        elif len(hsi_dict) != len(wl_dict):
-            raise IOError("number of different fluorescent images are not equal")
-        else:
-            for key, value in hsi_dict.items():
-                wl_key = key.replace("hsi", "wl")
-                wl_resize = resize(wl_dict[wl_key])
-                filename = key.replace("hsi","")
-                if MASK:
-                    final = shifted_mask(value, wl_resize, shift= SHIFT)
-                    cv2.imwrite(filename+'_mask.png', final)                    
-                final2 = shifted_combine(value, wl_resize, shift= SHIFT)
-                cv2.imwrite(filename+'_combine.png', final2)
+        # if (not hsi_dict) or (not wl_dict):
+        #     raise IOError(FileNotFoundError, "insufficient required image")
+        # elif len(hsi_dict) != len(wl_dict):
+        #     raise IOError("number of different fluorescent images are not equal")
+        # else:
+        #     for key, value in hsi_dict.items():
+        #         wl_key = key.replace("hsi", "wl")
+        #         wl_resize = resize(wl_dict[wl_key])
+        #         filename = key.replace("hsi","")
+        #         if MASK:
+        #             final = shifted_mask(value, wl_resize, shift= SHIFT)
+        #             cv2.imwrite(filename+'_mask.png', final)                    
+        #         final2 = shifted_combine(value, wl_resize, shift= SHIFT)
+        #         cv2.imwrite(filename+'_combine.png', final2)
+    
+        for i in img_list:
+            if i == '001.png':
+                wl_img = cv2.imread(i, cv2.IMREAD_COLOR)
+            else:
+                hsi_img = cv2.imread(i, cv2.IMREAD_COLOR)
+                filename = i.replace('.jpg', '')
+
+        wl_img = resize(wl_img)
+        out = shifted_combine(hsi_img, wl_img, shift= SHIFT)
+        cv2.imwrite(filename+'_combine.png', out)
 
     # Reference ========================================================================================
     if CALIBRATION:
