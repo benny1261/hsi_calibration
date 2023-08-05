@@ -88,8 +88,8 @@ if __name__ == '__main__':
                             cv2.imwrite(name+'_mask.png', mask)                 # should not save as jpg since compression may change values
                         else:
                             np.save(f'{name}_{index}', nparr)
-                            cv2.imwrite(f'{name}_slice_{index}.jpg', img_gray)
-                            cv2.imwrite(f'{name}_mask_{index}.png', mask)       # should not save as jpg since compression may change values
+                            cv2.imwrite(f'{name}_{index}_slice.jpg', img_gray)
+                            cv2.imwrite(f'{name}_{index}_mask.png', mask)       # should not save as jpg since compression may change values
                         print('slice saved')
                     # cv2.imshow("Segmented Object", mask)
                     # cv2.waitKey(0)

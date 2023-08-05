@@ -79,10 +79,10 @@ def shifted_combine(hsi:np.ndarray, wl:np.ndarray, shift:tuple, alpha:int = ALPH
 
 if __name__ == '__main__':
     # READ =============================================================================================
-    os.chdir(os.path.dirname(os.path.abspath(__file__))+'/data')
-    img_list = glob.glob('*.jpg')+ glob.glob('*.png')
-    hsi_dict = {}
-    wl_dict = {}
+    # os.chdir(os.path.dirname(os.path.abspath(__file__))+'/data')
+    # img_list = glob.glob('*.jpg')+ glob.glob('*.png')
+    # hsi_dict = {}
+    # wl_dict = {}
 
     # Process===========================================================================================
     if not CALIBRATION:
@@ -106,17 +106,27 @@ if __name__ == '__main__':
         #             cv2.imwrite(filename+'_mask.png', final)                    
         #         final2 = shifted_combine(value, wl_resize, shift= SHIFT)
         #         cv2.imwrite(filename+'_combine.png', final2)
-    
-        for i in img_list:
-            if i == '001.png':
-                wl_img = cv2.imread(i, cv2.IMREAD_COLOR)
-            else:
-                hsi_img = cv2.imread(i, cv2.IMREAD_COLOR)
-                filename = i.replace('.jpg', '')
 
-        wl_img = resize(wl_img)
-        out = shifted_combine(hsi_img, wl_img, shift= SHIFT)
-        cv2.imwrite(filename+'_combine.png', out)
+        # --------------------------------------------------------------
+        rootdir = os.path.dirname(__file__)+r'/data'
+
+        for root, dirs, files in os.walk(rootdir):
+            for dir_name in dirs:
+                current_folder = os.path.join(root, dir_name)
+                print(current_folder)
+                os.chdir(current_folder)
+                wl_list = glob.glob('*.png')
+                hsi_list = glob.glob('*.jpg')
+                if not all((wl_list, hsi_list)):
+                    continue
+
+                wl_img = cv2.imread('001.png', cv2.IMREAD_COLOR)
+                hsi_img = cv2.imread(hsi_list[0], cv2.IMREAD_COLOR)
+                filename = hsi_list[0].replace('.jpg', '')
+
+                wl_img = resize(wl_img)
+                out = shifted_combine(hsi_img, wl_img, shift= SHIFT)
+                cv2.imwrite(filename+'_combine.png', out)
 
     # Reference ========================================================================================
     if CALIBRATION:
